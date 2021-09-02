@@ -1,14 +1,17 @@
 package com.example.resttutorial
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Component
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
 import java.util.*
+import javax.annotation.PostConstruct
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -26,10 +29,10 @@ interface TeaRepository: CrudRepository<Tea, Int>
 
 @Entity
 class Tea(
+	var name: String,
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	var id: Int = 0,
-	var name: String
+	var id: Int = 0
 	)
 
 @RestController
@@ -64,5 +67,22 @@ class TeaController(private val teaRepository: TeaRepository) {
 	@DeleteMapping("/{id}")
 	fun deleteTea(@PathVariable id:Int) {
 		teaRepository.deleteById(id)
+	}
+}
+
+@Component
+class DataLoader {
+	@Autowired
+	lateinit var teaRepository: TeaRepository
+
+	@PostConstruct
+	fun loadData() {
+		teaRepository.saveAll(
+			mutableListOf(
+			Tea(name="Green tea"),
+			Tea(name="Black tea"),
+			Tea(name="White tea"),
+			Tea(name="Tea with milk")
+		))
 	}
 }
